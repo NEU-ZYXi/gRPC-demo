@@ -54,6 +54,7 @@ public class GreetServiceImpl extends GreetServiceGrpc.GreetServiceImplBase {
     // client streaming, return a stream observer since it's asynchronous
     @Override
     public StreamObserver<LongGreetRequest> longGreet(StreamObserver<LongGreetResponse> responseObserver) {
+
         StreamObserver<LongGreetRequest> requestStreamObserver = new StreamObserver<LongGreetRequest>() {
 
             String result = "";
@@ -75,6 +76,33 @@ public class GreetServiceImpl extends GreetServiceGrpc.GreetServiceImplBase {
                 responseObserver.onNext(LongGreetResponse.newBuilder()
                     .setResult(result)
                     .build());
+                responseObserver.onCompleted();
+            }
+        };
+
+        return requestStreamObserver;
+    }
+
+
+    // bi-directional streaming
+    @Override
+    public StreamObserver<GreetEveryoneRequest> greetEveryone(StreamObserver<GreetEveryoneResponse> responseObserver) {
+
+        StreamObserver<GreetEveryoneRequest> requestStreamObserver = new StreamObserver<GreetEveryoneRequest>() {
+            @Override
+            public void onNext(GreetEveryoneRequest value) {
+                String result = "Hello " +  value.getGreeting().getFirstName() + "\n";
+                GreetEveryoneResponse response = GreetEveryoneResponse.newBuilder().setResult(result).build();
+                responseObserver.onNext(response);
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onCompleted() {
                 responseObserver.onCompleted();
             }
         };
