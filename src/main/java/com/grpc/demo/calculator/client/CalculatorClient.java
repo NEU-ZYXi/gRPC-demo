@@ -3,6 +3,10 @@ package com.grpc.demo.calculator.client;
 import com.proto.calculator.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.stub.StreamObserver;
+
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
 
 public class CalculatorClient {
 
@@ -27,14 +31,50 @@ public class CalculatorClient {
 
 
         // Server Streaming
-        Long number = 5678908123123123137L;
-        PrimeNumberDecompositionRequest request = PrimeNumberDecompositionRequest.newBuilder()
-                .setNumber(number)
-                .build();
-        calculatorClient.primeNumberDecomposition(request)
-                .forEachRemaining(primeNumberDecompositionResponse -> {
-                    System.out.println(primeNumberDecompositionResponse.getPrimeFactor());
-                });
+//        Long number = 5678908123123123137L;
+//        PrimeNumberDecompositionRequest request = PrimeNumberDecompositionRequest.newBuilder()
+//                .setNumber(number)
+//                .build();
+//        calculatorClient.primeNumberDecomposition(request)
+//                .forEachRemaining(primeNumberDecompositionResponse -> {
+//                    System.out.println(primeNumberDecompositionResponse.getPrimeFactor());
+//                });
+
+
+        // Client Streaming
+        CalculatorServiceGrpc.CalculatorServiceStub asyncClient = CalculatorServiceGrpc.newStub(channel);
+
+        CountDownLatch latch = new CountDownLatch(1);
+
+        StreamObserver<ComputeAverageRequest> requestStreamObserver = asyncClient.computeAverage(new StreamObserver<ComputeAverageResponse>() {
+            @Override
+            public void onNext(ComputeAverageResponse value) {
+                System.out.println(value.getAverage());
+            }
+
+            @Override
+            public void onError(Throwable t) {
+
+            }
+
+            @Override
+            public void onCompleted() {
+                latch.countDown();
+            }
+        });
+
+        for (int i = 0; i < 1000; ++i) {
+            requestStreamObserver.onNext(ComputeAverageRequest.newBuilder().setNumber(i).build());
+        }
+
+        requestStreamObserver.onCompleted();
+
+        try {
+            latch.await(3, TimeUnit.SECONDS);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+
 
 
         channel.shutdown();
