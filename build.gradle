@@ -32,7 +32,7 @@ repositories {
 dependencies {
 
     // gRPC
-    compile 'io.grpc:grpc-netty-shaded:1.20.0'
+    compile 'io.grpc:grpc-netty-shaded:1.20.0'  // shaded: include ssl libraries
     compile 'io.grpc:grpc-protobuf:1.20.0'
     compile 'io.grpc:grpc-stub:1.20.0'
 
