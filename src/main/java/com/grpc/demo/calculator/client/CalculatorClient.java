@@ -3,6 +3,7 @@ package com.grpc.demo.calculator.client;
 import com.proto.calculator.*;
 import io.grpc.ManagedChannel;
 import io.grpc.ManagedChannelBuilder;
+import io.grpc.StatusRuntimeException;
 import io.grpc.stub.StreamObserver;
 
 import java.util.Arrays;
@@ -78,47 +79,59 @@ public class CalculatorClient {
 
 
         // Bi-directional Streaming
-        CalculatorServiceGrpc.CalculatorServiceStub asyncClient = CalculatorServiceGrpc.newStub(channel);
+//        CalculatorServiceGrpc.CalculatorServiceStub asyncClient = CalculatorServiceGrpc.newStub(channel);
+//
+//        CountDownLatch latch = new CountDownLatch(1);
+//
+//        StreamObserver<FindMaximumRequest> requestStreamObserver = asyncClient.findMaximum(new StreamObserver<FindMaximumResponse>() {
+//            @Override
+//            public void onNext(FindMaximumResponse value) {
+//                System.out.println("Current maximum number: " + value.getMax());
+//            }
+//
+//            @Override
+//            public void onError(Throwable t) {
+//                latch.countDown();
+//            }
+//
+//            @Override
+//            public void onCompleted() {
+//                System.out.println("Server is done");
+//                latch.countDown();
+//            }
+//        });
+//
+//        Arrays.asList(3, 5, 13, 8, 9, 12, 20).forEach(
+//                number -> {
+//                    System.out.println("Sending number: " + number);
+//                    requestStreamObserver.onNext(FindMaximumRequest.newBuilder().setNumber(number).build());
+//                    try {
+//                        Thread.sleep(300);
+//                    } catch (InterruptedException e) {
+//                        e.printStackTrace();
+//                    }
+//                }
+//        );
+//
+//        requestStreamObserver.onCompleted();
+//
+//        try {
+//            latch.await(3, TimeUnit.SECONDS);
+//        } catch (InterruptedException e) {
+//            e.printStackTrace();
+//        }
 
-        CountDownLatch latch = new CountDownLatch(1);
 
-        StreamObserver<FindMaximumRequest> requestStreamObserver = asyncClient.findMaximum(new StreamObserver<FindMaximumResponse>() {
-            @Override
-            public void onNext(FindMaximumResponse value) {
-                System.out.println("Current maximum number: " + value.getMax());
-            }
-
-            @Override
-            public void onError(Throwable t) {
-                latch.countDown();
-            }
-
-            @Override
-            public void onCompleted() {
-                System.out.println("Server is done");
-                latch.countDown();
-            }
-        });
-
-        Arrays.asList(3, 5, 13, 8, 9, 12, 20).forEach(
-                number -> {
-                    System.out.println("Sending number: " + number);
-                    requestStreamObserver.onNext(FindMaximumRequest.newBuilder().setNumber(number).build());
-                    try {
-                        Thread.sleep(200);
-                    } catch (InterruptedException e) {
-                        e.printStackTrace();
-                    }
-                }
-        );
-
-        requestStreamObserver.onCompleted();
-
-        try {
-            latch.await(3, TimeUnit.SECONDS);
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        }
+        // Error Handling
+//        int number = -4324;
+//
+//        SquareRootRequest squareRootRequest = SquareRootRequest.newBuilder().setNumber(number).build();
+//        try {
+//            SquareRootResponse squareRootResponse = calculatorClient.squareRoot(squareRootRequest);
+//            System.out.println(squareRootResponse.getNumberRoot());
+//        } catch (StatusRuntimeException e) {
+//            e.printStackTrace();
+//        }
 
 
         channel.shutdown();

@@ -1,6 +1,7 @@
 package com.grpc.demo.greeting.server;
 
 import com.proto.greet.*;
+import io.grpc.Context;
 import io.grpc.stub.StreamObserver;
 
 public class GreetServiceImpl extends GreetServiceGrpc.GreetServiceImplBase {
@@ -108,5 +109,29 @@ public class GreetServiceImpl extends GreetServiceGrpc.GreetServiceImplBase {
         };
 
         return requestStreamObserver;
+    }
+
+
+    @Override
+    public void greetWithDeadline(GreetWithDeadlineRequest request, StreamObserver<GreetWithDeadlineResponse> responseObserver) {
+
+        Context current = Context.current();
+
+        try {
+            for (int i = 0; i < 3; i++) {
+                if (!current.isCancelled()) {
+                    System.out.println("Sleep for 100ms");
+                    Thread.sleep(100);
+                } else {
+                    return;
+                }
+            }
+
+            System.out.println("Sending response");
+            responseObserver.onNext(GreetWithDeadlineResponse.newBuilder().setResult(request.getGreeting().getFirstName() + " Completed").build());
+            responseObserver.onCompleted();
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
     }
 }
